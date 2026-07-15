@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gestión de Estudiantes</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0f4f8;
+      color: #1a202c;
+      min-height: 100vh;
+    }
+
+    header {
+      background: #2b6cb0;
+      color: white;
+      padding: 1.25rem 2rem;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    header h1 { font-size: 1.3rem; font-weight: 600; }
+
+    .container {
+      max-width: 900px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    }
+
+    .card h2 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: #2d3748;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .form-grid input, .form-grid select {
+      width: 100%;
+      padding: 9px 12px;
+      border: 1px solid #cbd5e0;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .form-grid input:focus, .form-grid select:focus {
+      border-color: #2b6cb0;
+    }
+
+    .btn {
+      padding: 9px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      font-weight: 500;
+      transition: opacity 0.15s;
+    }
+
+    .btn:hover { opacity: 0.85; }
+    .btn-primary { background: #2b6cb0; color: white; }
+    .btn-danger  { background: #e53e3e; color: white; }
+    .btn-warning { background: #d69e2e; color: white; }
+    .btn-sm { padding: 6px 12px; font-size: 0.8rem; }
+
+    .actions { margin-top: 1rem; display: flex; gap: 10px; flex-wrap: wrap; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+
+    th {
+      text-align: left;
+      padding: 10px 12px;
+      background: #edf2f7;
+      color: #4a5568;
+      font-weight: 600;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    td {
+      padding: 10px 12px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #f7fafc; }
+
+    .badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 99px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .badge-activo   { background: #c6f6d5; color: #276749; }
+    .badge-inactivo { background: #fed7d7; color: #9b2c2c; }
+
+    .empty {
+      text-align: center;
+      padding: 2rem;
+      color: #a0aec0;
+      font-size: 0.9rem;
+    }
+
+    #msg {
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      display: none;
+      margin-bottom: 1rem;
+    }
+
+    .msg-ok  { background: #c6f6d5; color: #276749; display: block !important; }
+    .msg-err { background: #fed7d7; color: #9b2c2c; display: block !important; }
+
+    @media (max-width: 600px) {
+      .form-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <svg width="24" height="24" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24">
+    <path d="M12 14l9-5-9-5-9 5 9 5z"/><path d="M12 14l6.16-3.422A12.083 12.083 0 0122 21H2a12.083 12.083 0 013.84-10.422L12 14z"/>
+  </svg>
+  <h1>Gestión de Estudiantes</h1>
+</header>
+
+<div class="container">
+
+  <div id="msg"></div>
+
+  <div class="card">
+    <h2 id="form-title">Registrar nuevo estudiante</h2>
+    <div class="form-grid">
+      <input type="hidden" id="edit-id" />
+      <input id="nombre"    type="text"   placeholder="Nombre completo" />
+      <input id="codigo"    type="text"   placeholder="Código de estudiante" />
+      <input id="carrera"   type="text"   placeholder="Carrera / Programa" />
+      <input id="semestre"  type="number" placeholder="Semestre" min="1" max="12" />
+      <input id="email"     type="email"  placeholder="Correo electrónico" />
+      <select id="estado">
+        <option value="Activo">Activo</option>
+        <option value="Inactivo">Inactivo</option>
+      </select>
+    </div>
+    <div class="actions">
+      <button class="btn btn-primary" onclick="guardar()">Guardar</button>
+      <button class="btn" style="background:#e2e8f0;color:#4a5568" onclick="cancelarEdicion()">Limpiar</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Lista de estudiantes</h2>
+    <div id="tabla-wrap">
+      <div class="empty">Cargando...</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const API = "/api/estudiantes";
+  let editando = null;
+
+  function mostrarMsg(texto, tipo) {
+    const el = document.getElementById("msg");
+    el.textContent = texto;
+    el.className = tipo === "ok" ? "msg-ok" : "msg-err";
+    setTimeout(() => { el.className = ""; el.style.display = "none"; }, 3000);
+  }
+
+  async function cargarEstudiantes() {
+    const res = await fetch(API);
+    const datos = await res.json();
+    const wrap = document.getElementById("tabla-wrap");
+
+    if (datos.length === 0) {
+      wrap.innerHTML = '<div class="empty">No hay estudiantes registrados aún.</div>';
+      return;
+    }
+
+    wrap.innerHTML = `
+      <table>
+        <thead>
+          <tr>
+            <th>#</th><th>Nombre</th><th>Código</th>
+            <th>Carrera</th><th>Semestre</th><th>Email</th>
+            <th>Estado</th><th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${datos.map(e => `
+            <tr>
+              <td>${e.id}</td>
+              <td><strong>${e.nombre}</strong></td>
+              <td>${e.codigo}</td>
+              <td>${e.carrera}</td>
+              <td>${e.semestre}</td>
+              <td>${e.email}</td>
+              <td>
+                <span class="badge ${e.estado === 'Activo' ? 'badge-activo' : 'badge-inactivo'}">
+                  ${e.estado}
+                </span>
+              </td>
+              <td style="display:flex;gap:6px">
+                <button class="btn btn-warning btn-sm" onclick="editar(${e.id})">Editar</button>
+                <button class="btn btn-danger btn-sm" onclick="eliminar(${e.id})">Eliminar</button>
+              </td>
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>
+    `;
+  }
+
+  async function guardar() {
+    const estudiante = {
+      nombre:   document.getElementById("nombre").value.trim(),
+      codigo:   document.getElementById("codigo").value.trim(),
+      carrera:  document.getElementById("carrera").value.trim(),
+      semestre: parseInt(document.getElementById("semestre").value),
+      email:    document.getElementById("email").value.trim(),
+      estado:   document.getElementById("estado").value,
+    };
+
+    if (!estudiante.nombre || !estudiante.codigo || !estudiante.carrera) {
+      mostrarMsg("Por favor completa los campos obligatorios.", "err");
+      return;
+    }
+
+    if (editando) {
+      await fetch(`${API}/${editando}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(estudiante)
+      });
+      mostrarMsg("Estudiante actualizado correctamente.", "ok");
+    } else {
+      await fetch(API, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(estudiante)
+      });
+      mostrarMsg("Estudiante registrado exitosamente.", "ok");
+    }
+
+    cancelarEdicion();
+    cargarEstudiantes();
+  }
+
+  async function editar(id) {
+    const res = await fetch(API);
+    const datos = await res.json();
+    const e = datos.find(x => x.id === id);
+    if (!e) return;
+
+    editando = id;
+    document.getElementById("form-title").textContent = "Editar estudiante";
+    document.getElementById("nombre").value   = e.nombre;
+    document.getElementById("codigo").value   = e.codigo;
+    document.getElementById("carrera").value  = e.carrera;
+    document.getElementById("semestre").value = e.semestre;
+    document.getElementById("email").value    = e.email;
+    document.getElementById("estado").value   = e.estado;
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  async function eliminar(id) {
+    if (!confirm("¿Seguro que deseas eliminar este estudiante?")) return;
+    await fetch(`${API}/${id}`, { method: "DELETE" });
+    mostrarMsg("Estudiante eliminado.", "ok");
+    cargarEstudiantes();
+  }
+
+  function cancelarEdicion() {
+    editando = null;
+    document.getElementById("form-title").textContent = "Registrar nuevo estudiante";
+    ["nombre","codigo","carrera","semestre","email"].forEach(id => {
+      document.getElementById(id).value = "";
+    });
+    document.getElementById("estado").value = "Activo";
+  }
+
+  cargarEstudiantes();
+</script>
+
+</body>
+</html>

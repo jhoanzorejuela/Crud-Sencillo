@@ -1,2 +1,6 @@
-# Crud-Sencillo
-Crud hecho con python (+flask) y html
+# Sistema CRUD de Gestión de Estudiantes
+
+Aplicacion fullstack para la gestion de estudiantes 
+
+Desarrollado por Jhoanz Sebastian Orejuela Mier
+UTS
